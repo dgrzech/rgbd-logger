@@ -74,21 +74,39 @@ int main(int argc, char *argv[]) try {
   /* start pipeline */
   rs2::pipeline_profile selection = pipe.start(cfg);
 
+  /* get rgb stream and print camera intrinsics */
+  auto rgb_stream =
+      selection.get_stream(RS2_STREAM_COLOR).as<rs2::video_stream_profile>();
+
+  auto resolution_rgb = std::make_pair(rgb_stream.width(), rgb_stream.height());
+  auto i_rgb = rgb_stream.get_intrinsics();
+  auto principal_point_rgb = std::make_pair(i_rgb.ppx, i_rgb.ppy);
+  auto focal_length_rgb = std::make_pair(i_rgb.fx, i_rgb.fy);
+  rs2_distortion model_rgb = i_rgb.model;
+
+  std::cout << "rgb camera principal point         : "
+            << principal_point_rgb.first << ", " << principal_point_rgb.second
+            << std::endl;
+  std::cout << "rgb camera focal length            : " << focal_length_rgb.first
+            << ", " << focal_length_rgb.second << std::endl;
+
   /* get depth stream and print depth camera intrinsics */
   auto depth_stream =
       selection.get_stream(RS2_STREAM_DEPTH).as<rs2::video_stream_profile>();
 
-  auto resolution = std::make_pair(depth_stream.width(), depth_stream.height());
-  auto i = depth_stream.get_intrinsics();
-  auto principal_point = std::make_pair(i.ppx, i.ppy);
-  auto focal_length = std::make_pair(i.fx, i.fy);
-  rs2_distortion model = i.model;
+  auto resolution_depth =
+      std::make_pair(depth_stream.width(), depth_stream.height());
+  auto i_depth = depth_stream.get_intrinsics();
+  auto principal_point_depth = std::make_pair(i_depth.ppx, i_depth.ppy);
+  auto focal_length_depth = std::make_pair(i_depth.fx, i_depth.fy);
+  rs2_distortion model_depth = i_depth.model;
 
   std::cout << "depth camera principal point         : "
-            << principal_point.first << ", " << principal_point.second
+            << principal_point_depth.first << ", "
+            << principal_point_depth.second << std::endl;
+  std::cout << "depth camera focal length            : "
+            << focal_length_depth.first << ", " << focal_length_depth.second
             << std::endl;
-  std::cout << "depth camera focal length            : " << focal_length.first
-            << ", " << focal_length.second << std::endl;
 
   /* camera warmup--drop several first frames to let
    auto-exposure stabilize */
